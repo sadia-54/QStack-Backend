@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	"github.com/sadia-54/QStack-Backend/internal/config"
+	"github.com/sadia-54/qstack-backend/internal/config"
 )
 
 func main() {

@@ -1,4 +1,4 @@
-module github.com/sadia-54/QStack-Backend
+module github.com/sadia-54/qstack-backend
 
 go 1.25.5
 
