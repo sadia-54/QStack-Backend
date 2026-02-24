@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"errors"
+
 	"github.com/sadia-54/qstack-backend/internal/models/domains"
 	gormmodels "github.com/sadia-54/qstack-backend/internal/models/gorm"
 
@@ -18,12 +20,25 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 // repository methods
 func (r *UserRepository) CreateUser(user *domains.User) error {
 	gormUser := mapDomainToGorm(user)
-	return r.db.Create(&gormUser).Error
+	err := r.db.Create(&gormUser).Error
+	if err != nil {
+		return err
+	}
+
+	// Copy DB-generated fields back to domain model
+	user.ID = gormUser.ID
+	user.CreatedAt = gormUser.CreatedAt
+	user.UpdatedAt = gormUser.UpdatedAt
+
+return nil
 }
 
 func (r *UserRepository) FindByEmailOrUsername (identifier string) (*domains.User, error) {
 	var gormUser gormmodels.User
 	err := r.db.Where("email = ? OR username = ?", identifier, identifier).First(&gormUser).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}

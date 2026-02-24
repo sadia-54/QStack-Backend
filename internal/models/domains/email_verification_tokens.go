@@ -10,3 +10,12 @@ type EmailVerificationToken struct {
 	UsedAt    *time.Time
 	CreatedAt time.Time
 }
+
+func NewEmailVerificationToken(userID int64, tokenHash string, expiresAt time.Time) *EmailVerificationToken {
+	return &EmailVerificationToken{
+		UserID:    userID,
+		TokenHash: tokenHash,
+		ExpiresAt: expiresAt,
+		CreatedAt: time.Now(),
+	}
+}
