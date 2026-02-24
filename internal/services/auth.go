@@ -2,16 +2,18 @@ package services
 
 import (
 	"crypto/rand"
-	"encoding/base64"
 	"crypto/sha256"
+	"encoding/base64"
 	"errors"
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/sadia-54/qstack-backend/internal/models/domains"
+	"github.com/sadia-54/qstack-backend/internal/queue"
 	"github.com/sadia-54/qstack-backend/internal/repositories"
 )
 
@@ -83,7 +85,9 @@ func (s *AuthService) Signup(email, username, password string) (string, error) {
 	}
 
 	// 6. Return temporary verification link 
-	verifyURL := fmt.Sprintf("%s/verify-email?token=%s", s.appBaseURL, rawToken)
+	verifyURL := fmt.Sprintf("%s/verify-email?token=%s", s.appBaseURL, url.QueryEscape(rawToken))
+
+	queue.PublishEmailVerification(email, rawToken)
 
 	return verifyURL, nil
 }
@@ -178,7 +182,7 @@ func generateEmailVerificationToken() (rawToken string, hashed string, expires t
 		return "", "", time.Time{}, err
 	}
 
-	raw := base64.URLEncoding.EncodeToString(b)
+	raw := base64.RawURLEncoding.EncodeToString(b)
 	hashed = hashToken(raw)
 	expires = time.Now().Add(24 * time.Hour)
 
@@ -193,6 +197,6 @@ func hashToken(token string) string {
 }
 
 func sha256Sum(s string) string {
-	b := sha256.Sum256([]byte(s))
-	return base64.URLEncoding.EncodeToString(b[:])
+    b := sha256.Sum256([]byte(s))
+    return base64.RawURLEncoding.EncodeToString(b[:])
 }

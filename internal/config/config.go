@@ -17,6 +17,9 @@ type Env struct {
 	DBSSLMode   string
 	JWTSecret   string
 	AppBaseURL  string
+	RabbitURL   string
+	MailpitHost string
+	MailpitPort string
 }
 
 func Load() Env {
@@ -33,6 +36,9 @@ func Load() Env {
 		DBSSLMode:  get("DB_SSLMODE", "disable"),
 		JWTSecret:  os.Getenv("JWT_SECRET"),
 		AppBaseURL: get("APP_BASE_URL", "http://localhost:8080"),
+		RabbitURL:   get("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/"),
+		MailpitHost: get("MAILPIT_HOST", "localhost"),
+		MailpitPort: get("MAILPIT_PORT", "1025"),
 	}
 
 	if env.DBPass == "" {
