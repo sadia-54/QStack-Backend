@@ -1,0 +1,10 @@
+DROP TABLE IF EXISTS notifications;
+DROP TABLE IF EXISTS password_reset_tokens;
+DROP TABLE IF EXISTS question_votes;
+DROP TABLE IF EXISTS comments;
+DROP TABLE IF EXISTS answers;
+DROP TABLE IF EXISTS question_tags;
+DROP TABLE IF EXISTS questions;
+DROP TABLE IF EXISTS user_preferred_tags;
+DROP TABLE IF EXISTS tags;
+DROP TABLE IF EXISTS users;
