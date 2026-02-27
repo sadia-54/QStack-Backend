@@ -96,6 +96,10 @@ func (s *AuthService) Signup(email, username, password string) (string, error) {
 func (s *AuthService) Login(identifier, password string) (string, string, error) {
 	user, err := s.userRepo.FindByEmailOrUsername(identifier)
 	if err != nil {
+		return "", "", errors.New("database error")
+	}
+
+	if user == nil {
 		return "", "", errors.New("invalid credentials")
 	}
 
@@ -131,7 +135,21 @@ func (s *AuthService) VerifyEmail(rawToken string) error {
 	// Find valid token
 	token, err := s.tokenRepo.FindValidToken(tokenHash)
 	if err != nil {
-		return errors.New("invalid or expired token")
+		return errors.New("Database Error")
+	}
+
+	if token == nil {
+		return errors.New("Invalid or expired token")
+	}
+
+	// check if already used
+	if token.UsedAt != nil {
+		return errors.New("Token already used")
+	}
+
+	// check if expired
+	if time.Now().After(token.ExpiresAt) {
+		return errors.New("Token expired")
 	}
 
 	// Mark token as used

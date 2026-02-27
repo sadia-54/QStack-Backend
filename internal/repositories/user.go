@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/sadia-54/qstack-backend/internal/models/domains"
-	gormmodels "github.com/sadia-54/qstack-backend/internal/models/gorm"
 
 	"gorm.io/gorm"
 )
@@ -19,23 +18,17 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 
 // repository methods
 func (r *UserRepository) CreateUser(user *domains.User) error {
-	gormUser := mapDomainToGorm(user)
-	err := r.db.Create(&gormUser).Error
+	err := r.db.Create(user).Error
 	if err != nil {
 		return err
 	}
 
-	// Copy DB-generated fields back to domain model
-	user.ID = gormUser.ID
-	user.CreatedAt = gormUser.CreatedAt
-	user.UpdatedAt = gormUser.UpdatedAt
-
-return nil
+	return nil
 }
 
 func (r *UserRepository) FindByEmailOrUsername (identifier string) (*domains.User, error) {
-	var gormUser gormmodels.User
-	err := r.db.Where("email = ? OR username = ?", identifier, identifier).First(&gormUser).Error
+	var user domains.User
+	err := r.db.Where("email = ? OR username = ?", identifier, identifier).First(&user).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
@@ -43,51 +36,21 @@ func (r *UserRepository) FindByEmailOrUsername (identifier string) (*domains.Use
 		return nil, err
 	}
 
-	return mapGormToDomain(&gormUser), nil
+	return &user, nil
 
 }
 
 func (r *UserRepository) UpdateUser (user *domains.User) error {
-	gormUser := mapDomainToGorm(user)
-	return r.db.Save(&gormUser).Error
+
+	return r.db.Save(user).Error
 }
 
 func (r *UserRepository) GetUserByID(id int64) (*domains.User, error){
-	var gormUser gormmodels.User
-	err := r.db.First(&gormUser, id).Error
+	var user domains.User
+	err := r.db.First(&user, id).Error
 	if err != nil {
 		return nil, err
 	}
 
-	return mapGormToDomain(&gormUser), nil
-}
-
-
-// Helper functions to map between domain and gorm models
-func mapDomainToGorm(user *domains.User) gormmodels.User {
-	return gormmodels.User{
-		ID:                        user.ID,
-		Email:                     user.Email,
-		PasswordHash:              user.PasswordHash,
-		Username:                  user.Username,
-		Bio:                       user.Bio,
-		EmailVerified:             user.EmailVerified,
-		EmailNotificationsEnabled: user.EmailNotificationsEnabled,
-		CreatedAt:                 user.CreatedAt,
-		UpdatedAt:                 user.UpdatedAt,
-	}
-}
-
-func mapGormToDomain(user *gormmodels.User) *domains.User {
-	return &domains.User{
-		ID:                        user.ID,
-		Email:                     user.Email,
-		PasswordHash:              user.PasswordHash,
-		Username:                  user.Username,
-		Bio:                       user.Bio,
-		EmailVerified:             user.EmailVerified,
-		EmailNotificationsEnabled: user.EmailNotificationsEnabled,
-		CreatedAt:                 user.CreatedAt,
-		UpdatedAt:                 user.UpdatedAt,
-	}
+	return &user, nil
 }
