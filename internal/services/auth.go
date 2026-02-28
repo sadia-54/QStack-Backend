@@ -142,10 +142,10 @@ func (s *AuthService) VerifyEmail(rawToken string) error {
 		return errors.New("Invalid or expired token")
 	}
 
-	// check if already used
-	if token.UsedAt != nil {
-		return errors.New("Token already used")
-	}
+	// // check if already used
+	// if token.UsedAt != nil {
+	// 	return errors.New("Token already used")
+	// }
 
 	// check if expired
 	if time.Now().After(token.ExpiresAt) {
