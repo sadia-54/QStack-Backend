@@ -28,14 +28,21 @@ func main() {
 	defer queue.Close()
 
 	// Initialize repositories
+	// user repo
 	userRepo := repositories.NewUserRepository(config.DB)
 	tokenRepo := repositories.NewEmailVerificationTokenRepository(config.DB)
 
+	// question repo
+	questionRepo := repositories.NewQuestionRepository(config.DB)
+	tagRepo := repositories.NewTagRepository(config.DB)
+
 	// Initialize services
 	authService := services.NewAuthService(userRepo, tokenRepo, env.JWTSecret, env.AppBaseURL)
+	questionService := services.NewQuestionService(questionRepo, tagRepo)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
+	questionHandler := handlers.NewQuestionHandler(questionService)
 
 	// setup echo server
 	e := echo.New()
@@ -89,6 +96,8 @@ func main() {
 
 	// register auth routes
 	routes.RegisterAuthRoutes(api, authHandler)
+	// register question routes
+	routes.RegisterQuestionRoutes(api, questionHandler)
 
 	// protected routes
 	protected := api.Group("/protected")

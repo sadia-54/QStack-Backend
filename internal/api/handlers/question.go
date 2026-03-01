@@ -1,1 +1,99 @@
 package handlers
+
+import (
+	"net/http"
+	"strconv"
+
+	"github.com/labstack/echo/v4"
+
+	"github.com/sadia-54/qstack-backend/internal/models/dtos"
+	"github.com/sadia-54/qstack-backend/internal/services"
+)
+
+type QuestionHandler struct {
+	service *services.QuestionService
+}
+
+func NewQuestionHandler(s *services.QuestionService) *QuestionHandler {
+	return &QuestionHandler{service: s}
+}
+
+func (h *QuestionHandler) Create(c echo.Context) error {
+
+	var req dtos.CreateQuestion
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid request"})
+	}
+
+	userID := c.Get("user_id").(float64)
+
+	res, err := h.service.Create(int64(userID), req)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusCreated, res)
+}
+
+func (h *QuestionHandler) Update(c echo.Context) error {
+
+	idParam := c.Param("id")
+	id, _ := strconv.ParseInt(idParam, 10, 64)
+
+	var req dtos.UpdateQuestion
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid request"})
+	}
+
+	userID := c.Get("user_id").(float64)
+
+	if err := h.service.Update(int64(userID), id, req); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{"message": "updated"})
+}
+
+func (h *QuestionHandler) Feed(c echo.Context) error {
+
+	questions, err := h.service.GetFeed(20, 0)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "failed"})
+	}
+
+	return c.JSON(http.StatusOK, questions)
+}
+
+func (h *QuestionHandler) GetByID(c echo.Context) error {
+
+	idParam := c.Param("id")
+	id, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid id"})
+	}
+
+	question, err := h.service.GetByID(id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, echo.Map{"error": "question not found"})
+	}
+
+	return c.JSON(http.StatusOK, question)
+}
+
+func (h *QuestionHandler) Delete(c echo.Context) error {
+
+	idParam := c.Param("id")
+	id, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid id"})
+	}
+
+	userID := c.Get("user_id").(float64) // JWT claims are float64
+	userIDInt := int64(userID)
+
+	if err := h.service.Delete(userIDInt, id); err != nil {
+		return c.JSON(http.StatusForbidden, echo.Map{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{"message": "deleted"})
+}
