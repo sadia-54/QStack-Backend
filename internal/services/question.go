@@ -88,8 +88,15 @@ func (s *QuestionService) Update(userID, questionID int64, req dtos.UpdateQuesti
 	return s.questionRepo.Update(question)
 }
 
-func (s *QuestionService) GetFeed(limit, offset int) ([]*dtos.QuestionResponse, error) {
-	questions, err := s.questionRepo.GetFeed(limit, offset)
+func (s *QuestionService) GetFeed(
+	search string,
+	tag string,
+	sort string,
+	limit int,
+	offset int,
+) ([]*dtos.QuestionResponse, error) {
+
+	questions, err := s.questionRepo.GetFeed(search, tag, sort, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +108,6 @@ func (s *QuestionService) GetFeed(limit, offset int) ([]*dtos.QuestionResponse, 
 
 	return response, nil
 }
-
 func (s *QuestionService) GetByID(id int64) (*dtos.QuestionResponse, error) {
 
 	question, err := s.questionRepo.FindByID(id)

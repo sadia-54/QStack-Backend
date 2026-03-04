@@ -34,11 +34,45 @@ func (r *QuestionRepository) FindByID(id int64) (*domains.Question, error) {
 	return &question, nil
 }
 
-func (r *QuestionRepository) GetFeed(limit, offset int) ([]domains.Question, error) {
+func (r *QuestionRepository) GetFeed(
+	search string,
+	tag string,
+	sort string,
+	limit int,
+	offset int,
+) ([]domains.Question, error) {
+
 	var questions []domains.Question
-	err := r.db.Preload("User").
-		Preload("Tags").
-		Order("created_at DESC").
+
+	query := r.db.
+		Model(&domains.Question{}).
+		Preload("User").
+		Preload("Tags")
+
+	// Search by title
+	if search != "" {
+		query = query.Where("title ILIKE ?", "%"+search+"%")
+	}
+
+	// Filter by tag
+	if tag != "" {
+		query = query.
+			Joins("JOIN question_tags qt ON qt.question_id = questions.id").
+			Joins("JOIN tags t ON t.id = qt.tag_id").
+			Where("t.name = ?", tag)
+	}
+
+	// Sorting
+	switch sort {
+	case "votes":
+		query = query.Order("vote_count DESC")
+	case "date":
+		query = query.Order("created_at DESC")
+	default:
+		query = query.Order("created_at DESC")
+	}
+
+	err := query.
 		Limit(limit).
 		Offset(offset).
 		Find(&questions).Error

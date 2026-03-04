@@ -56,7 +56,31 @@ func (h *QuestionHandler) Update(c echo.Context) error {
 
 func (h *QuestionHandler) Feed(c echo.Context) error {
 
-	questions, err := h.service.GetFeed(20, 0)
+	search := c.QueryParam("search")
+	tag := c.QueryParam("tag")
+	sort := c.QueryParam("sort")
+
+	limitStr := c.QueryParam("limit")
+	offsetStr := c.QueryParam("offset")
+
+	limit := 20
+	offset := 0
+
+	if limitStr != "" {
+		l, err := strconv.Atoi(limitStr)
+		if err == nil {
+			limit = l
+		}
+	}
+
+	if offsetStr != "" {
+		o, err := strconv.Atoi(offsetStr)
+		if err == nil {
+			offset = o
+		}
+	}
+
+	questions, err := h.service.GetFeed(search, tag, sort, limit, offset)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "failed"})
 	}
