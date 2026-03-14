@@ -121,3 +121,26 @@ func (h *QuestionHandler) Delete(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, echo.Map{"message": "deleted"})
 }
+
+func (h *QuestionHandler) Vote(c echo.Context) error {
+
+	idParam := c.Param("id")
+	questionID, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid id"})
+	}
+
+	userID := int64(c.Get("user_id").(float64))
+
+	var req dtos.VoteQuestion
+
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid request"})
+	}
+
+	if err := h.service.Vote(userID, questionID, req.Value); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{"message": "vote updated"})
+}

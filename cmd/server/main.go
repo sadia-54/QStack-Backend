@@ -35,13 +35,14 @@ func main() {
 	// question repo
 	questionRepo := repositories.NewQuestionRepository(config.DB)
 	tagRepo := repositories.NewTagRepository(config.DB)
+	voteRepo := repositories.NewQuestionVoteRepository(config.DB)
 
 	// answer repo
 	answerRepo := repositories.NewAnswerRepository(config.DB)
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo, tokenRepo, env.JWTSecret, env.AppBaseURL)
-	questionService := services.NewQuestionService(questionRepo, tagRepo)
+	questionService := services.NewQuestionService(questionRepo, tagRepo, voteRepo)
 	answerService := services.NewAnswerService(answerRepo, questionRepo)
 
 	// Initialize handlers

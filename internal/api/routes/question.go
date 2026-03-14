@@ -21,4 +21,7 @@ func RegisterQuestionRoutes(api *echo.Group, handler *handlers.QuestionHandler) 
 	protected.POST("", handler.Create)
 	protected.PUT("/:id", handler.Update)
 	protected.DELETE("/:id", handler.Delete)
+
+	// for voting
+	protected.POST("/:id/vote", handler.Vote)
 }

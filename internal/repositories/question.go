@@ -83,3 +83,13 @@ func (r *QuestionRepository) GetFeed(
 func (r *QuestionRepository) Delete(id int64) error {
 	return r.db.Delete(&domains.Question{}, id).Error
 }
+
+func (r *QuestionRepository) UpdateVoteCount(questionID int64, diff int) error {
+
+	return r.db.
+		Model(&domains.Question{}).
+		Where("id = ?", questionID).
+		UpdateColumn("vote_count", gorm.Expr("vote_count + ?", diff)).
+		Error
+}
+

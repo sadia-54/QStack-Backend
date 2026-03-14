@@ -12,12 +12,14 @@ import (
 type QuestionService struct {
 	questionRepo *repositories.QuestionRepository
 	tagRepo      *repositories.TagRepository
+	voteRepo     *repositories.QuestionVoteRepository
 }
 
-func NewQuestionService(qr *repositories.QuestionRepository, tr *repositories.TagRepository) *QuestionService {
+func NewQuestionService(qr *repositories.QuestionRepository, tr *repositories.TagRepository, vr *repositories.QuestionVoteRepository) *QuestionService {
 	return &QuestionService{
 		questionRepo: qr,
 		tagRepo:      tr,
+		voteRepo:     vr,
 	}
 }
 
@@ -153,4 +155,60 @@ func mapToQuestionResponse(q *domains.Question) *dtos.QuestionResponse {
 		CreatedAt: q.CreatedAt.Format(time.RFC3339),
 		UpdatedAt: q.UpdatedAt.Format(time.RFC3339),
 	}
+}
+
+func (s *QuestionService) Vote(userID, questionID int64, value int) error {
+
+	question, err := s.questionRepo.FindByID(questionID)
+	if err != nil {
+		return err
+	}
+
+	// owner cannot vote
+	if question.UserID == userID {
+		return errors.New("cannot vote own question")
+	}
+
+	existing, err := s.voteRepo.Find(questionID, userID)
+
+	// first vote
+	if err != nil {
+
+		if !s.voteRepo.IsNotFound(err) {
+			return err
+		}
+
+		vote := &domains.QuestionVote{
+			QuestionID: questionID,
+			UserID:     userID,
+			Value:      value,
+		}
+
+		if err := s.voteRepo.Create(vote); err != nil {
+			return err
+		}
+
+		return s.questionRepo.UpdateVoteCount(questionID, value)
+	}
+
+	// same vote → remove vote
+	if existing.Value == value {
+
+		if err := s.voteRepo.Delete(existing.ID); err != nil {
+			return err
+		}
+
+		return s.questionRepo.UpdateVoteCount(questionID, -value)
+	}
+
+	// change vote
+	diff := value - existing.Value
+
+	existing.Value = value
+
+	if err := s.voteRepo.Update(existing); err != nil {
+		return err
+	}
+
+	return s.questionRepo.UpdateVoteCount(questionID, diff)
 }
