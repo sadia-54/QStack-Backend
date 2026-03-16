@@ -110,6 +110,28 @@ func (s *QuestionService) GetFeed(
 
 	return response, nil
 }
+
+// for my interested feed 
+func (s *QuestionService) GetMyFeed(
+	userID int64,
+	limit int,
+	offset int,
+) ([]*dtos.QuestionResponse, error) {
+
+	questions, err := s.questionRepo.GetMyFeed(userID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	var response []*dtos.QuestionResponse
+
+	for _, q := range questions {
+		response = append(response, mapToQuestionResponse(&q))
+	}
+
+	return response, nil
+}
+
 func (s *QuestionService) GetByID(id int64) (*dtos.QuestionResponse, error) {
 
 	question, err := s.questionRepo.FindByID(id)

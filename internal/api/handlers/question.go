@@ -88,6 +88,38 @@ func (h *QuestionHandler) Feed(c echo.Context) error {
 	return c.JSON(http.StatusOK, questions)
 }
 
+func (h *QuestionHandler) MyFeed(c echo.Context) error {
+
+	userID := int64(c.Get("user_id").(float64))
+
+	limitStr := c.QueryParam("limit")
+	offsetStr := c.QueryParam("offset")
+
+	limit := 20
+	offset := 0
+
+	if limitStr != "" {
+		l, err := strconv.Atoi(limitStr)
+		if err == nil {
+			limit = l
+		}
+	}
+
+	if offsetStr != "" {
+		o, err := strconv.Atoi(offsetStr)
+		if err == nil {
+			offset = o
+		}
+	}
+
+	questions, err := h.service.GetMyFeed(userID, limit, offset)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "failed"})
+	}
+
+	return c.JSON(http.StatusOK, questions)
+}
+
 func (h *QuestionHandler) GetByID(c echo.Context) error {
 
 	idParam := c.Param("id")

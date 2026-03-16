@@ -93,3 +93,47 @@ func (r *QuestionRepository) UpdateVoteCount(questionID int64, diff int) error {
 		Error
 }
 
+func (r *QuestionRepository) GetMyFeed(
+	userID int64,
+	limit int,
+	offset int,
+) ([]domains.Question, error) {
+
+	var questions []domains.Question
+
+	subQuery := `
+	    SELECT qt.tag_id
+	    FROM questions q2
+	    JOIN question_tags qt ON qt.question_id = q2.id
+	    WHERE q2.user_id = ?
+
+	    UNION
+
+	    SELECT qt.tag_id
+	    FROM question_votes v
+	    JOIN question_tags qt ON qt.question_id = v.question_id
+	    WHERE v.user_id = ?
+
+	    UNION
+
+	    SELECT qt.tag_id
+	    FROM answers a
+	    JOIN question_tags qt ON qt.question_id = a.question_id
+	    WHERE a.user_id = ?
+	`
+
+	err := r.db.
+		Model(&domains.Question{}).
+		Distinct("questions.*").
+		Preload("User").
+		Preload("Tags").
+		Joins("JOIN question_tags qt ON qt.question_id = questions.id").
+		Where("qt.tag_id IN ("+subQuery+")", userID, userID, userID).
+		Where("questions.user_id != ?", userID).
+		Order("questions.created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&questions).Error
+
+	return questions, err
+}

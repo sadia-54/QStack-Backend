@@ -24,4 +24,7 @@ func RegisterQuestionRoutes(api *echo.Group, handler *handlers.QuestionHandler) 
 
 	// for voting
 	protected.POST("/:id/vote", handler.Vote)
+
+	// for user-specific feed
+	protected.GET("/my-feed", handler.MyFeed)
 }
