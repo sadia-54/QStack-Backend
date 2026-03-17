@@ -49,6 +49,6 @@ func PublishEmailVerification(email, token string) error {
 		return err
 	}
 
-	log.Println("📨 Email verification job published")
+	log.Println("Email verification job published")
 	return nil
 }
