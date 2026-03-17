@@ -31,3 +31,13 @@ type UserDTO struct {
 	EmailVerified             bool    `json:"email_verified"`
 	EmailNotificationsEnabled bool    `json:"email_notifications_enabled"`
 }
+
+type Profile struct {
+	ID             int64    `json:"id"`
+	Username       string   `json:"username"`
+	Bio            string   `json:"bio"`
+	TotalQuestions int64    `json:"total_questions"`
+	TotalAnswers   int64    `json:"total_answers"`
+	TotalVotes     int64    `json:"total_votes"`
+	PreferredTags  []string `json:"preferred_tags"`
+}

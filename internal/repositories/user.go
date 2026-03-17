@@ -54,3 +54,44 @@ func (r *UserRepository) GetUserByID(id int64) (*domains.User, error){
 
 	return &user, nil
 }
+
+func (r *UserRepository) GetProfileStats(userID int64) (int64, int64, int64, error) {
+
+	var totalQuestions int64
+	var totalAnswers int64
+	var totalVotes int64
+
+	// total questions
+	if err := r.db.
+		Model(&domains.Question{}).
+		Where("user_id = ?", userID).
+		Count(&totalQuestions).Error; err != nil {
+		return 0, 0, 0, err
+	}
+
+	// total answers
+	if err := r.db.
+		Model(&domains.Answer{}).
+		Where("user_id = ?", userID).
+		Count(&totalAnswers).Error; err != nil {
+		return 0, 0, 0, err
+	}
+
+	// total votes received
+	if err := r.db.
+		Model(&domains.Question{}).
+		Where("user_id = ?", userID).
+		Select("COALESCE(SUM(vote_count),0)").
+		Scan(&totalVotes).Error; err != nil {
+		return 0, 0, 0, err
+	}
+
+	return totalQuestions, totalAnswers, totalVotes, nil
+}
+
+func (r *UserRepository) UpdateBio(userID int64, bio string) error {
+	return r.db.
+		Model(&domains.User{}).
+		Where("id = ?", userID).
+		Update("bio", bio).Error
+}
