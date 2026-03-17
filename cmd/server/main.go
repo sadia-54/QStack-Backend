@@ -44,11 +44,13 @@ func main() {
 	authService := services.NewAuthService(userRepo, tokenRepo, env.JWTSecret, env.AppBaseURL)
 	questionService := services.NewQuestionService(questionRepo, tagRepo, voteRepo)
 	answerService := services.NewAnswerService(answerRepo, questionRepo)
+	userService := services.NewUserService(userRepo)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	questionHandler := handlers.NewQuestionHandler(questionService)
 	answerHandler := handlers.NewAnswerHandler(answerService)
+	userHandler := handlers.NewUserHandler(userService)
 
 	// setup echo server
 	e := echo.New()
@@ -106,6 +108,8 @@ func main() {
 	routes.RegisterQuestionRoutes(api, questionHandler)
 	// register answer routes
 	routes.RegisterAnswerRoutes(api, answerHandler)
+	// register user routes
+	routes.RegisterUserRoutes(api, userHandler)
 
 	// protected routes
 	protected := api.Group("/protected")
