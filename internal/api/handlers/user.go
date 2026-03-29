@@ -47,3 +47,38 @@ func (h *UserHandler) UpdateProfile(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, echo.Map{"message": "profile updated"})
 }
+
+func (h *UserHandler) GetActivity(c echo.Context) error {
+
+	userIDParam := c.Param("id")
+	userID, _ := strconv.ParseInt(userIDParam, 10, 64)
+
+	requestUserID := int64(c.Get("user_id").(float64))
+
+	// Only allow own activity
+	if userID != requestUserID {
+		return c.JSON(http.StatusForbidden, echo.Map{
+			"error": "not authorized",
+		})
+	}
+
+	res, err := h.userService.GetUserActivity(userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "failed"})
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
+
+// get my profile
+func (h *UserHandler) GetMyProfile(c echo.Context) error {
+
+	userID := int64(c.Get("user_id").(float64))
+
+	res, err := h.userService.GetProfile(userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "failed"})
+	}
+
+	return c.JSON(http.StatusOK, res)
+}

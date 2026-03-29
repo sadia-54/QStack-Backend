@@ -95,3 +95,75 @@ func (r *UserRepository) UpdateBio(userID int64, bio string) error {
 		Where("id = ?", userID).
 		Update("bio", bio).Error
 }
+
+func (r *UserRepository) GetUserQuestions(userID int64, limit int) ([]domains.Question, error) {
+	var questions []domains.Question
+
+	err := r.db.
+		Where("user_id = ?", userID).
+		Order("created_at DESC").
+		Limit(limit).
+		Find(&questions).Error
+
+	return questions, err
+}
+
+func (r *UserRepository) GetUserAnswers(userID int64, limit int) ([]domains.Answer, error) {
+	var answers []domains.Answer
+
+	err := r.db.
+		Where("user_id = ?", userID).
+		Order("created_at DESC").
+		Limit(limit).
+		Find(&answers).Error
+
+	return answers, err
+}
+
+func (r *UserRepository) GetUserVotes(userID int64, limit int) ([]domains.QuestionVote, error) {
+	var votes []domains.QuestionVote
+
+	err := r.db.
+		Where("user_id = ?", userID).
+		Order("created_at DESC").
+		Limit(limit).
+		Find(&votes).Error
+
+	return votes, err
+}
+
+func (r *UserRepository) GetAcceptedAnswers(userID int64, limit int) ([]domains.Answer, error) {
+	var answers []domains.Answer
+
+	err := r.db.
+		Where("user_id = ? AND is_accepted = true", userID).
+		Order("updated_at DESC").
+		Limit(limit).
+		Find(&answers).Error
+
+	return answers, err
+}
+
+func (r *UserRepository) GetEditedQuestions(userID int64, limit int) ([]domains.Question, error) {
+	var questions []domains.Question
+
+	err := r.db.
+		Where("user_id = ? AND updated_at > created_at", userID).
+		Order("updated_at DESC").
+		Limit(limit).
+		Find(&questions).Error
+
+	return questions, err
+}
+
+func (r *UserRepository) GetEditedAnswers(userID int64, limit int) ([]domains.Answer, error) {
+	var answers []domains.Answer
+
+	err := r.db.
+		Where("user_id = ? AND updated_at > created_at", userID).
+		Order("updated_at DESC").
+		Limit(limit).
+		Find(&answers).Error
+
+	return answers, err
+}

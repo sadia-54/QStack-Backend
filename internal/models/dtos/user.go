@@ -40,4 +40,14 @@ type Profile struct {
 	TotalAnswers   int64    `json:"total_answers"`
 	TotalVotes     int64    `json:"total_votes"`
 	PreferredTags  []string `json:"preferred_tags"`
+	CreatedAt      string   `json:"created_at"`
+}
+
+// user activity 
+type ActivityItem struct {
+	Type      string `json:"type"` // question, answer, vote, edit, accept
+	Title     string `json:"title,omitempty"`
+	TargetID  int64  `json:"target_id,omitempty"`
+	Value     int    `json:"value,omitempty"`
+	CreatedAt string `json:"created_at"`
 }
