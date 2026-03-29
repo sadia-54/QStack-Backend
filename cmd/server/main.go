@@ -57,6 +57,9 @@ func main() {
 	e.Use(echoMiddleware.Logger())
 	e.Use(echoMiddleware.Recover())
 
+	// serve uploaded images
+	e.Static("/uploads", "uploads")
+
 	// CORS
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
 		AllowOrigins: []string{
@@ -110,6 +113,9 @@ func main() {
 	routes.RegisterAnswerRoutes(api, answerHandler)
 	// register user routes
 	routes.RegisterUserRoutes(api, userHandler)
+
+	// image upload routes
+	routes.RegisterUploadRoutes(api)
 
 	// protected routes
 	protected := api.Group("/protected")
