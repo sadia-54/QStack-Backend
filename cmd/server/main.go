@@ -31,6 +31,7 @@ func main() {
 	// user repo
 	userRepo := repositories.NewUserRepository(config.DB)
 	tokenRepo := repositories.NewEmailVerificationTokenRepository(config.DB)
+	resetRepo := repositories.NewPasswordResetTokenRepository(config.DB)
 
 	// question repo
 	questionRepo := repositories.NewQuestionRepository(config.DB)
@@ -41,7 +42,7 @@ func main() {
 	answerRepo := repositories.NewAnswerRepository(config.DB)
 
 	// Initialize services
-	authService := services.NewAuthService(userRepo, tokenRepo, env.JWTSecret, env.AppBaseURL)
+	authService := services.NewAuthService(userRepo, tokenRepo, resetRepo, env.JWTSecret, env.AppBaseURL)
 	questionService := services.NewQuestionService(questionRepo, tagRepo, voteRepo)
 	answerService := services.NewAnswerService(answerRepo, questionRepo)
 	userService := services.NewUserService(userRepo)

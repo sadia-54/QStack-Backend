@@ -14,6 +14,7 @@ const EmailQueueName = "email_verification_queue"
 type EmailJob struct {
 	Email string `json:"email"`
 	Token string `json:"token"`
+	Type  string `json:"type"` // verify or reset
 }
 
 func PublishEmailVerification(email, token string) error {
@@ -51,4 +52,28 @@ func PublishEmailVerification(email, token string) error {
 
 	log.Println("Email verification job published")
 	return nil
+}
+
+func PublishPasswordReset(email, token string) error {
+
+	body, _ := json.Marshal(EmailJob{
+		Email: email,
+		Token: token,
+		Type:  "reset",
+	})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	return RabbitChannel.PublishWithContext(
+		ctx,
+		"",
+		EmailQueueName,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        body,
+		},
+	)
 }

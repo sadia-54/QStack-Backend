@@ -108,3 +108,44 @@ func (h *AuthHandler) ChangePassword(c echo.Context) error {
 		"message": "password changed successfully",
 	})
 }
+
+func (h *AuthHandler) ForgotPassword(c echo.Context) error {
+
+	var body dtos.ForgotPasswordRequest
+
+	if err := c.Bind(&body); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid request"})
+	}
+
+	if err := c.Validate(&body); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+	}
+
+	h.authService.ForgotPassword(body.Email)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "If the email exists, reset link was sent",
+	})
+}
+
+func (h *AuthHandler) ResetPassword(c echo.Context) error {
+
+	var body dtos.ResetPasswordRequest
+
+	if err := c.Bind(&body); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid request"})
+	}
+
+	if err := c.Validate(&body); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+	}
+
+	err := h.authService.ResetPassword(body.Token, body.NewPassword)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "password reset successful",
+	})
+}

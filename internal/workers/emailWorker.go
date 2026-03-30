@@ -29,14 +29,25 @@ func EmailWorker(body []byte) error {
 	//Mailpit requires NO authentication
 	var auth smtp.Auth = nil
 
+	// determine email type
+	subject := "Verify Your Email"
+	link := fmt.Sprintf("%s/verify-email?token=%s", env.AppBaseURL, job.Token)
+	text := "Click the link below to verify your email:"
+
+	if job.Type == "reset" {
+		subject = "Reset Your Password"
+		link = fmt.Sprintf("%s/reset-password?token=%s", env.AppBaseURL, job.Token)
+		text = "Click the link below to reset your password:"
+	}
+
 	// Build email content
 	message := []byte(fmt.Sprintf(
 		"From: %s\r\n"+
 			"To: %s\r\n"+
-			"Subject: Verify Your Email\r\n"+
+			"Subject: %s\r\n"+
 			"Content-Type: text/plain; charset=UTF-8\r\n\r\n"+
-			"Click the link below to verify your email:\n%s/verify-email?token=%s\n",
-		from, to, env.AppBaseURL, job.Token,
+			"%s\n%s\n",
+		from, to, subject, text, link,
 	))
 
 	// Send email

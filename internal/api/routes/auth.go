@@ -16,6 +16,8 @@ func RegisterAuthRoutes(e *echo.Group, authHandler *handlers.AuthHandler) {
 	auth.POST("/signup", authHandler.Signup)
 	auth.POST("/login", authHandler.Login)
 	auth.GET("/verify-email", authHandler.VerifyEmail)
+	auth.POST("/forgot-password", authHandler.ForgotPassword)
+	auth.POST("/reset-password", authHandler.ResetPassword)
 
 	// Protected routes
 	protected.POST("/change-password", authHandler.ChangePassword)
