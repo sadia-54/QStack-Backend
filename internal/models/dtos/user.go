@@ -51,3 +51,9 @@ type ActivityItem struct {
 	Value     int    `json:"value,omitempty"`
 	CreatedAt string `json:"created_at"`
 }
+
+// password change
+type ChangePassword struct {
+	CurrentPassword string `json:"current_password" validate:"required"`
+	NewPassword     string `json:"new_password" validate:"required,min=6"`
+}

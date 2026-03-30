@@ -234,3 +234,20 @@ func (s *QuestionService) Vote(userID, questionID int64, value int) error {
 
 	return s.questionRepo.UpdateVoteCount(questionID, diff)
 }
+
+// user owned questions for profile page
+func (s *QuestionService) GetMyQuestions(userID int64, limit int, offset int) ([]*dtos.QuestionResponse, error) {
+
+	questions, err := s.questionRepo.GetByUserID(userID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	var response []*dtos.QuestionResponse
+
+	for _, q := range questions {
+		response = append(response, mapToQuestionResponse(&q))
+	}
+
+	return response, nil
+}

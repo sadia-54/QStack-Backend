@@ -83,3 +83,28 @@ func (h *AuthHandler) VerifyEmail(c echo.Context) error {
 		"message": "Email verified successfully",
 	})
 }
+
+// change password
+func (h *AuthHandler) ChangePassword(c echo.Context) error {
+
+	userID := int64(c.Get("user_id").(float64))
+
+	var body dtos.ChangePassword
+
+	if err := c.Bind(&body); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid request"})
+	}
+
+	if err := c.Validate(&body); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+	}
+
+	err := h.authService.ChangePassword(userID, body.CurrentPassword, body.NewPassword)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "password changed successfully",
+	})
+}

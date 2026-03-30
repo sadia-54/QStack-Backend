@@ -218,3 +218,36 @@ func sha256Sum(s string) string {
     b := sha256.Sum256([]byte(s))
     return base64.RawURLEncoding.EncodeToString(b[:])
 }
+
+// change password
+func (s *AuthService) ChangePassword(userID int64, currentPassword, newPassword string) error {
+
+	user, err := s.userRepo.GetUserByID(userID)
+	if err != nil {
+		return errors.New("user not found")
+	}
+
+	// verify current password
+	if err := bcrypt.CompareHashAndPassword(
+		[]byte(user.PasswordHash),
+		[]byte(currentPassword),
+	); err != nil {
+		return errors.New("current password incorrect")
+	}
+
+	// prevent reusing same password
+	if currentPassword == newPassword {
+		return errors.New("new password must be different")
+	}
+
+	// hash new password
+	hashed, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	user.PasswordHash = string(hashed)
+	user.UpdatedAt = time.Now()
+
+	return s.userRepo.UpdateUser(user)
+}

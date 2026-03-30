@@ -176,3 +176,34 @@ func (h *QuestionHandler) Vote(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, echo.Map{"message": "vote updated"})
 }
+
+// user owned questions for profile page
+func (h *QuestionHandler) MyQuestions(c echo.Context) error {
+
+	userID := int64(c.Get("user_id").(float64))
+
+	limitStr := c.QueryParam("limit")
+	offsetStr := c.QueryParam("offset")
+
+	limit := 20
+	offset := 0
+
+	if limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil {
+			limit = l
+		}
+	}
+
+	if offsetStr != "" {
+		if o, err := strconv.Atoi(offsetStr); err == nil {
+			offset = o
+		}
+	}
+
+	questions, err := h.service.GetMyQuestions(userID, limit, offset)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "failed"})
+	}
+
+	return c.JSON(http.StatusOK, questions)
+}

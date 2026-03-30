@@ -137,3 +137,20 @@ func (r *QuestionRepository) GetMyFeed(
 
 	return questions, err
 }
+
+// user owned questions
+func (r *QuestionRepository) GetByUserID(userID int64, limit int, offset int) ([]domains.Question, error) {
+
+	var questions []domains.Question
+
+	err := r.db.
+		Where("user_id = ?", userID).
+		Preload("User").
+		Preload("Tags").
+		Order("created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&questions).Error
+
+	return questions, err
+}
