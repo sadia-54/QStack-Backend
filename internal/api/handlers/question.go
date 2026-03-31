@@ -207,3 +207,13 @@ func (h *QuestionHandler) MyQuestions(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, questions)
 }
+
+func (h *QuestionHandler) GetPopularTags(c echo.Context) error {
+
+	tags, err := h.service.GetPopularTags(10)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "failed"})
+	}
+
+	return c.JSON(http.StatusOK, tags)
+}

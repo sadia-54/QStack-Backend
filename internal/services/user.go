@@ -122,3 +122,7 @@ func (s *UserService) GetUserActivity(userID int64) ([]dtos.ActivityItem, error)
 
 	return activities, nil
 }
+
+func (s *UserService) GetCommunityStats() (int64, int64, int64, error) {
+	return s.userRepo.GetCommunityStats()
+}

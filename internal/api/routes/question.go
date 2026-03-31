@@ -28,4 +28,7 @@ func RegisterQuestionRoutes(api *echo.Group, handler *handlers.QuestionHandler) 
 
 	// for user-specific feed
 	protected.GET("/my-feed", handler.MyFeed)
+
+	// popular tags
+	api.GET("/tags/popular", handler.GetPopularTags)
 }

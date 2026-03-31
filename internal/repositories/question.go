@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"github.com/sadia-54/qstack-backend/internal/models/domains"
+	"github.com/sadia-54/qstack-backend/internal/models/dtos"
 	"gorm.io/gorm"
 )
 
@@ -153,4 +154,20 @@ func (r *QuestionRepository) GetByUserID(userID int64, limit int, offset int) ([
 		Find(&questions).Error
 
 	return questions, err
+}
+
+func (r *QuestionRepository) GetPopularTags(limit int) ([]dtos.TagStat, error) {
+
+	var result []dtos.TagStat
+
+	err := r.db.
+		Table("tags t").
+		Select("t.name as tag, COUNT(qt.question_id) as count").
+		Joins("JOIN question_tags qt ON qt.tag_id = t.id").
+		Group("t.name").
+		Order("count DESC").
+		Limit(limit).
+		Scan(&result).Error
+
+	return result, err
 }

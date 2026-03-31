@@ -40,17 +40,21 @@ func main() {
 
 	// answer repo
 	answerRepo := repositories.NewAnswerRepository(config.DB)
+	// comment repo
+	commentRepo := repositories.NewCommentRepository(config.DB)
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo, tokenRepo, resetRepo, env.JWTSecret, env.AppBaseURL)
 	questionService := services.NewQuestionService(questionRepo, tagRepo, voteRepo)
 	answerService := services.NewAnswerService(answerRepo, questionRepo)
+	commentService := services.NewCommentService(commentRepo, answerRepo)
 	userService := services.NewUserService(userRepo)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	questionHandler := handlers.NewQuestionHandler(questionService)
 	answerHandler := handlers.NewAnswerHandler(answerService)
+	commentHandler := handlers.NewCommentHandler(commentService)
 	userHandler := handlers.NewUserHandler(userService)
 
 	// setup echo server
@@ -112,6 +116,8 @@ func main() {
 	routes.RegisterQuestionRoutes(api, questionHandler)
 	// register answer routes
 	routes.RegisterAnswerRoutes(api, answerHandler)
+	// register comment routes
+	routes.RegisterCommentRoutes(api, commentHandler)
 	// register user routes
 	routes.RegisterUserRoutes(api, userHandler)
 

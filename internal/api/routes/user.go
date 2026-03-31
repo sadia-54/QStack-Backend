@@ -9,6 +9,7 @@ import (
 func RegisterUserRoutes(e *echo.Group, userHandler *handlers.UserHandler) {
 
 	user := e.Group("/users")
+	user.GET("/community/stats", userHandler.GetCommunityStats)
 
 	// Public routes
 	user.GET("/:id/profile", userHandler.GetProfile)

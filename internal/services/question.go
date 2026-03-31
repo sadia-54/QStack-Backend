@@ -251,3 +251,7 @@ func (s *QuestionService) GetMyQuestions(userID int64, limit int, offset int) ([
 
 	return response, nil
 }
+
+func (s *QuestionService) GetPopularTags(limit int) ([]dtos.TagStat, error) {
+	return s.questionRepo.GetPopularTags(limit)
+}

@@ -82,3 +82,16 @@ func (h *UserHandler) GetMyProfile(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, res)
 }
+
+func (h *UserHandler) GetCommunityStats(c echo.Context) error {
+	users, questions, answers, err := h.userService.GetCommunityStats()
+	if err != nil {
+		return c.JSON(500, echo.Map{"error": "failed"})
+	}
+
+	return c.JSON(200, echo.Map{
+		"total_users":     users,
+		"total_questions": questions,
+		"total_answers":   answers,
+	})
+}

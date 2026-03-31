@@ -167,3 +167,15 @@ func (r *UserRepository) GetEditedAnswers(userID int64, limit int) ([]domains.An
 
 	return answers, err
 }
+
+func (r *UserRepository) GetCommunityStats() (int64, int64, int64, error) {
+	var users int64
+	var questions int64
+	var answers int64
+
+	r.db.Model(&domains.User{}).Count(&users)
+	r.db.Model(&domains.Question{}).Count(&questions)
+	r.db.Model(&domains.Answer{}).Count(&answers)
+
+	return users, questions, answers, nil
+}
