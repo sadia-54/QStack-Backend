@@ -95,3 +95,22 @@ func (h *UserHandler) GetCommunityStats(c echo.Context) error {
 		"total_answers":   answers,
 	})
 }
+
+func (h *UserHandler) GetUsers(c echo.Context) error {
+
+	pageParam := c.QueryParam("page")
+	if pageParam == "" {
+		pageParam = "1"
+	}
+
+	page, _ := strconv.Atoi(pageParam)
+
+	limit := 20
+
+	res, err := h.userService.GetUsers(page, limit)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "failed"})
+	}
+
+	return c.JSON(http.StatusOK, res)
+}

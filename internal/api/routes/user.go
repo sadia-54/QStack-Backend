@@ -13,6 +13,7 @@ func RegisterUserRoutes(e *echo.Group, userHandler *handlers.UserHandler) {
 
 	// Public routes
 	user.GET("/:id/profile", userHandler.GetProfile)
+	user.GET("", userHandler.GetUsers)
 
 	// Protected routes
 	protected := user.Group("")

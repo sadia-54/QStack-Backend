@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/sadia-54/qstack-backend/internal/models/domains"
+	"github.com/sadia-54/qstack-backend/internal/models/dtos"
 
 	"gorm.io/gorm"
 )
@@ -178,4 +179,27 @@ func (r *UserRepository) GetCommunityStats() (int64, int64, int64, error) {
 	r.db.Model(&domains.Answer{}).Count(&answers)
 
 	return users, questions, answers, nil
+}
+
+func (r *UserRepository) GetUsers(limit int, offset int) ([]dtos.UserSummaryPublic, error) {
+
+	var users []dtos.UserSummaryPublic
+
+	err := r.db.Raw(`
+		SELECT 
+			u.id,
+			u.username,
+			COALESCE(u.bio,'') as bio,
+			u.created_at,
+
+			(SELECT COUNT(*) FROM questions q WHERE q.user_id = u.id) as total_questions,
+			(SELECT COUNT(*) FROM answers a WHERE a.user_id = u.id) as total_answers,
+			(SELECT COALESCE(SUM(vote_count),0) FROM questions q WHERE q.user_id = u.id) as total_votes
+
+		FROM users u
+		ORDER BY u.created_at DESC
+		LIMIT ? OFFSET ?
+	`, limit, offset).Scan(&users).Error
+
+	return users, err
 }

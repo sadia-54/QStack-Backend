@@ -57,3 +57,14 @@ type ChangePassword struct {
 	CurrentPassword string `json:"current_password" validate:"required"`
 	NewPassword     string `json:"new_password" validate:"required,min=6"`
 }
+
+// for public user listing 
+type UserSummaryPublic struct {
+	ID             int64  `json:"id"`
+	Username       string `json:"username"`
+	Bio            string `json:"bio"`
+	TotalQuestions int64  `json:"total_questions"`
+	TotalAnswers   int64  `json:"total_answers"`
+	TotalVotes     int64  `json:"total_votes"`
+	CreatedAt      string `json:"created_at"`
+}

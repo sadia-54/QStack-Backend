@@ -126,3 +126,15 @@ func (s *UserService) GetUserActivity(userID int64) ([]dtos.ActivityItem, error)
 func (s *UserService) GetCommunityStats() (int64, int64, int64, error) {
 	return s.userRepo.GetCommunityStats()
 }
+
+func (s *UserService) GetUsers(page int, limit int) ([]dtos.UserSummaryPublic, error) {
+
+	offset := (page - 1) * limit
+
+	users, err := s.userRepo.GetUsers(limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
