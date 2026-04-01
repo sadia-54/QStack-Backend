@@ -33,10 +33,17 @@ func (s *UserService) GetProfile(userID int64) (*dtos.Profile, error) {
 		bio = *user.Bio
 	}
 
+	var profileImage string
+	if user.ProfileImage != nil {
+		profileImage = *user.ProfileImage
+	}
+
 	return &dtos.Profile{
 		ID:             user.ID,
 		Username:       user.Username,
+		Email:          user.Email,
 		Bio:            bio,
+		ProfileImage:   profileImage,
 		TotalQuestions: q,
 		TotalAnswers:   a,
 		TotalVotes:     v,
@@ -46,6 +53,10 @@ func (s *UserService) GetProfile(userID int64) (*dtos.Profile, error) {
 
 func (s *UserService) UpdateProfile(userID int64, bio string) error {
 	return s.userRepo.UpdateBio(userID, bio)
+}
+
+func (s *UserService) UpdateProfileImage(userID int64, imagePath string) error {
+	return s.userRepo.UpdateProfileImage(userID, imagePath)
 }
 
 // user activity 

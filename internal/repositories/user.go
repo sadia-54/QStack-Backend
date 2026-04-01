@@ -203,3 +203,10 @@ func (r *UserRepository) GetUsers(limit int, offset int) ([]dtos.UserSummaryPubl
 
 	return users, err
 }
+
+func (r *UserRepository) UpdateProfileImage(userID int64, imagePath string) error {
+	return r.db.
+		Model(&domains.User{}).
+		Where("id = ?", userID).
+		Update("profile_image", imagePath).Error
+}

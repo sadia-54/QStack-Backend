@@ -35,7 +35,9 @@ type UserDTO struct {
 type Profile struct {
 	ID             int64    `json:"id"`
 	Username       string   `json:"username"`
+	Email          string   `json:"email"`
 	Bio            string   `json:"bio"`
+	ProfileImage   string   `json:"profile_image"`
 	TotalQuestions int64    `json:"total_questions"`
 	TotalAnswers   int64    `json:"total_answers"`
 	TotalVotes     int64    `json:"total_votes"`

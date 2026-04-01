@@ -8,6 +8,7 @@ type User struct {
     PasswordHash string `gorm:"type:text;not null"`
     Username  string `gorm:"type:varchar(50);not null"`
     Bio       *string `gorm:"type:text"`
+	ProfileImage *string `gorm:"type:text"`
     EmailNotificationsEnabled bool `gorm:"type:boolean;not null;default:false"`
     EmailVerified bool `gorm:"type:boolean;not null;default:false"`
     CreatedAt time.Time `gorm:"type:timestamptz;not null;default:now()"`

@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"io"
+	"os"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -46,6 +49,50 @@ func (h *UserHandler) UpdateProfile(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"message": "profile updated"})
+}
+
+func (h *UserHandler) UploadProfileImage(c echo.Context) error {
+
+	userID := int64(c.Get("user_id").(float64))
+
+	file, err := c.FormFile("image")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"error": "image required",
+		})
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	// create uploads folder if not exists
+	os.MkdirAll("uploads/profile-images", os.ModePerm)
+
+	filePath := fmt.Sprintf("uploads/profile-images/user-%d.png", userID)
+
+	dst, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	if _, err = io.Copy(dst, src); err != nil {
+		return err
+	}
+
+	imageURL := "/" + filePath
+
+	err = h.userService.UpdateProfileImage(userID, imageURL)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"profile_image": imageURL,
+	})
 }
 
 func (h *UserHandler) GetActivity(c echo.Context) error {

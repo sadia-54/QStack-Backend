@@ -22,4 +22,5 @@ func RegisterUserRoutes(e *echo.Group, userHandler *handlers.UserHandler) {
 	protected.PUT("/profile", userHandler.UpdateProfile)
 	protected.GET("/:id/activity", userHandler.GetActivity)
 	protected.GET("/me", userHandler.GetMyProfile)
+	protected.POST("/profile/image", userHandler.UploadProfileImage)
 }
