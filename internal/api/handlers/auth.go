@@ -59,10 +59,70 @@ func (h *AuthHandler) Login(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, echo.Map{"error": err.Error()})
 	}
 
+	// ------------------------------
+	// Set access token cookie
+	// ------------------------------
+	accessCookie := &http.Cookie{
+		Name:     "access_token",
+		Value:    accessToken,
+		Path:     "/",
+		HttpOnly: true,                    // JS can't access it
+		Secure:   false,                   // true in production (HTTPS)
+		SameSite: http.SameSiteLaxMode,    // or StrictMode
+		MaxAge:   60 * 60 * 24,            // 1 day
+	}
+	c.SetCookie(accessCookie)
+
+	// ------------------------------
+	// Set refresh token cookie
+	// ------------------------------
+	refreshCookie := &http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   7 * 24 * 60 * 60, // 7 days
+	}
+	c.SetCookie(refreshCookie)
+
+	// ------------------------------
+	// Return optional JSON response
+	// ------------------------------
 	return c.JSON(http.StatusOK, echo.Map{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
-		"token_type":    "Bearer",
+		"message": "login successful",
+	})
+}
+
+// logout - clear cookies
+func (h *AuthHandler) Logout(c echo.Context) error {
+	// Clear access_token cookie
+	accessCookie := &http.Cookie{
+		Name:     "access_token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   -1,
+	}
+	c.SetCookie(accessCookie)
+
+	// Clear refresh_token cookie
+	refreshCookie := &http.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   -1,
+	}
+	c.SetCookie(refreshCookie)
+
+	return c.JSON(200, echo.Map{
+		"message": "logged out",
 	})
 }
 

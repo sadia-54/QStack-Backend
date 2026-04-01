@@ -13,12 +13,26 @@ func JWTMiddleware() echo.MiddlewareFunc {
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			authHeader := c.Request().Header.Get("Authorization")
-			if authHeader == "" {
-				return c.JSON(http.StatusUnauthorized, echo.Map{"error": "missing token"})
-			}
 
-			tokenString := authHeader[len("Bearer "):]
+			var tokenString string
+
+			// Try Authorization header
+			authHeader := c.Request().Header.Get("Authorization")
+
+			if authHeader != "" {
+				tokenString = authHeader[len("Bearer "):]
+			} else {
+
+				// Try cookie
+				cookie, err := c.Cookie("access_token")
+				if err != nil {
+					return c.JSON(http.StatusUnauthorized, echo.Map{
+						"error": "missing token",
+					})
+				}
+
+				tokenString = cookie.Value
+			}
 
 			token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 				return []byte(secret), nil
@@ -34,6 +48,7 @@ func JWTMiddleware() echo.MiddlewareFunc {
 			}
 
 			c.Set("user_id", claims["user_id"])
+
 			return next(c)
 		}
 	}

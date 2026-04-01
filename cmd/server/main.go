@@ -83,6 +83,7 @@ func main() {
 			echo.HeaderAccept,
 			echo.HeaderAuthorization,
 		},
+		AllowCredentials: true,
 	}))
 
 	// register validator
