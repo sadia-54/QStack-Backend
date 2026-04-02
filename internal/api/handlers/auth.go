@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 
@@ -106,6 +107,7 @@ func (h *AuthHandler) Logout(c echo.Context) error {
 		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   -1,
+		Expires:  time.Unix(0, 0),
 	}
 	c.SetCookie(accessCookie)
 
@@ -118,6 +120,7 @@ func (h *AuthHandler) Logout(c echo.Context) error {
 		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   -1,
+		Expires:  time.Unix(0, 0),
 	}
 	c.SetCookie(refreshCookie)
 
