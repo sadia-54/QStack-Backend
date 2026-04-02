@@ -35,9 +35,40 @@ type UserDTO struct {
 type Profile struct {
 	ID             int64    `json:"id"`
 	Username       string   `json:"username"`
+	Email          string   `json:"email"`
 	Bio            string   `json:"bio"`
+	ProfileImage   string   `json:"profile_image"`
 	TotalQuestions int64    `json:"total_questions"`
 	TotalAnswers   int64    `json:"total_answers"`
 	TotalVotes     int64    `json:"total_votes"`
 	PreferredTags  []string `json:"preferred_tags"`
+	CreatedAt      string   `json:"created_at"`
+}
+
+// user activity
+type ActivityItem struct {
+	Type       string `json:"type"` // question, answer, vote, edit, accept
+	Title      string `json:"title,omitempty"`
+	TargetID   int64  `json:"target_id,omitempty"`
+	QuestionID int64  `json:"question_id,omitempty"` // For answer activities
+	EntityType string `json:"entity_type,omitempty"` // 'question' or 'answer' for vote/edit activities
+	Value      int    `json:"value,omitempty"`
+	CreatedAt  string `json:"created_at"`
+}
+
+// password change
+type ChangePassword struct {
+	CurrentPassword string `json:"current_password" validate:"required"`
+	NewPassword     string `json:"new_password" validate:"required,min=6"`
+}
+
+// for public user listing
+type UserSummaryPublic struct {
+	ID             int64  `json:"id"`
+	Username       string `json:"username"`
+	Bio            string `json:"bio"`
+	TotalQuestions int64  `json:"total_questions"`
+	TotalAnswers   int64  `json:"total_answers"`
+	TotalVotes     int64  `json:"total_votes"`
+	CreatedAt      string `json:"created_at"`
 }

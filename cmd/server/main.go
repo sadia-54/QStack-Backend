@@ -31,6 +31,7 @@ func main() {
 	// user repo
 	userRepo := repositories.NewUserRepository(config.DB)
 	tokenRepo := repositories.NewEmailVerificationTokenRepository(config.DB)
+	resetRepo := repositories.NewPasswordResetTokenRepository(config.DB)
 
 	// question repo
 	questionRepo := repositories.NewQuestionRepository(config.DB)
@@ -39,23 +40,30 @@ func main() {
 
 	// answer repo
 	answerRepo := repositories.NewAnswerRepository(config.DB)
+	// comment repo
+	commentRepo := repositories.NewCommentRepository(config.DB)
 
 	// Initialize services
-	authService := services.NewAuthService(userRepo, tokenRepo, env.JWTSecret, env.AppBaseURL)
+	authService := services.NewAuthService(userRepo, tokenRepo, resetRepo, env.JWTSecret, env.AppBaseURL)
 	questionService := services.NewQuestionService(questionRepo, tagRepo, voteRepo)
 	answerService := services.NewAnswerService(answerRepo, questionRepo)
+	commentService := services.NewCommentService(commentRepo, answerRepo)
 	userService := services.NewUserService(userRepo)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	questionHandler := handlers.NewQuestionHandler(questionService)
 	answerHandler := handlers.NewAnswerHandler(answerService)
+	commentHandler := handlers.NewCommentHandler(commentService)
 	userHandler := handlers.NewUserHandler(userService)
 
 	// setup echo server
 	e := echo.New()
 	e.Use(echoMiddleware.Logger())
 	e.Use(echoMiddleware.Recover())
+
+	// serve uploaded images
+	e.Static("/uploads", "uploads")
 
 	// CORS
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
@@ -75,6 +83,7 @@ func main() {
 			echo.HeaderAccept,
 			echo.HeaderAuthorization,
 		},
+		AllowCredentials: true,
 	}))
 
 	// register validator
@@ -108,8 +117,13 @@ func main() {
 	routes.RegisterQuestionRoutes(api, questionHandler)
 	// register answer routes
 	routes.RegisterAnswerRoutes(api, answerHandler)
+	// register comment routes
+	routes.RegisterCommentRoutes(api, commentHandler)
 	// register user routes
 	routes.RegisterUserRoutes(api, userHandler)
+
+	// image upload routes
+	routes.RegisterUploadRoutes(api)
 
 	// protected routes
 	protected := api.Group("/protected")

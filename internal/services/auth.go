@@ -20,6 +20,7 @@ import (
 type AuthService struct {
 	userRepo   *repositories.UserRepository
 	tokenRepo  *repositories.EmailVerificationTokenRepository
+	resetRepo  *repositories.PasswordResetTokenRepository
 	jwtSecret  string
 	appBaseURL string
 }
@@ -27,12 +28,14 @@ type AuthService struct {
 func NewAuthService(
 	userRepo *repositories.UserRepository,
 	tokenRepo *repositories.EmailVerificationTokenRepository,
+	resetRepo *repositories.PasswordResetTokenRepository,
 	jwtSecret string,
 	appBaseURL string, // e.g., http://localhost:3000
 ) *AuthService {
 	return &AuthService{
 		userRepo:   userRepo,
 		tokenRepo:  tokenRepo,
+		resetRepo:  resetRepo,
 		jwtSecret:  jwtSecret,
 		appBaseURL: appBaseURL,
 	}
@@ -217,4 +220,87 @@ func hashToken(token string) string {
 func sha256Sum(s string) string {
     b := sha256.Sum256([]byte(s))
     return base64.RawURLEncoding.EncodeToString(b[:])
+}
+
+// change password
+func (s *AuthService) ChangePassword(userID int64, currentPassword, newPassword string) error {
+
+	user, err := s.userRepo.GetUserByID(userID)
+	if err != nil {
+		return errors.New("user not found")
+	}
+
+	// verify current password
+	if err := bcrypt.CompareHashAndPassword(
+		[]byte(user.PasswordHash),
+		[]byte(currentPassword),
+	); err != nil {
+		return errors.New("current password incorrect")
+	}
+
+	// prevent reusing same password
+	if currentPassword == newPassword {
+		return errors.New("new password must be different")
+	}
+
+	// hash new password
+	hashed, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	user.PasswordHash = string(hashed)
+	user.UpdatedAt = time.Now()
+
+	return s.userRepo.UpdateUser(user)
+}
+
+func (s *AuthService) ForgotPassword(email string) error {
+
+	user, err := s.userRepo.FindByEmailOrUsername(email)
+	if err != nil || user == nil {
+		return nil // do not reveal user existence
+	}
+
+	rawToken, tokenHash, expires, err := generateEmailVerificationToken()
+	if err != nil {
+		return err
+	}
+
+	token := domains.NewPasswordResetToken(user.ID, tokenHash, expires)
+
+	if err := s.resetRepo.CreateToken(token); err != nil {
+		return err
+	}
+
+	return queue.PublishPasswordReset(user.Email, rawToken)
+}
+
+func (s *AuthService) ResetPassword(rawToken, newPassword string) error {
+
+	hash := hashToken(rawToken)
+
+	token, err := s.resetRepo.FindValidToken(hash)
+	if err != nil || token == nil {
+		return errors.New("invalid or expired token")
+	}
+
+	user, err := s.userRepo.GetUserByID(token.UserID)
+	if err != nil {
+		return err
+	}
+
+	hashed, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	user.PasswordHash = string(hashed)
+	user.UpdatedAt = time.Now()
+
+	if err := s.userRepo.UpdateUser(user); err != nil {
+		return err
+	}
+
+	return s.resetRepo.MarkUsed(token.ID)
 }
