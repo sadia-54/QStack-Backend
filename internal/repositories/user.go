@@ -27,7 +27,7 @@ func (r *UserRepository) CreateUser(user *domains.User) error {
 	return nil
 }
 
-func (r *UserRepository) FindByEmailOrUsername (identifier string) (*domains.User, error) {
+func (r *UserRepository) FindByEmailOrUsername(identifier string) (*domains.User, error) {
 	var user domains.User
 	err := r.db.Where("email = ? OR username = ?", identifier, identifier).First(&user).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -41,12 +41,12 @@ func (r *UserRepository) FindByEmailOrUsername (identifier string) (*domains.Use
 
 }
 
-func (r *UserRepository) UpdateUser (user *domains.User) error {
+func (r *UserRepository) UpdateUser(user *domains.User) error {
 
 	return r.db.Save(user).Error
 }
 
-func (r *UserRepository) GetUserByID(id int64) (*domains.User, error){
+func (r *UserRepository) GetUserByID(id int64) (*domains.User, error) {
 	var user domains.User
 	err := r.db.First(&user, id).Error
 	if err != nil {
@@ -121,28 +121,35 @@ func (r *UserRepository) GetUserAnswers(userID int64, limit int) ([]domains.Answ
 	return answers, err
 }
 
-func (r *UserRepository) GetUserVotes(userID int64, limit int) ([]domains.QuestionVote, error) {
-	var votes []domains.QuestionVote
+func (r *UserRepository) GetUserVotes(userID int64, limit int) ([]dtos.QuestionVoteWithDetails, error) {
+	var votes []dtos.QuestionVoteWithDetails
 
 	err := r.db.
-		Where("user_id = ?", userID).
-		Order("created_at DESC").
+		Table("question_votes qv").
+		Select("qv.id, qv.question_id, qv.value, qv.created_at, q.title as question_title").
+		Joins("JOIN questions q ON qv.question_id = q.id").
+		Where("qv.user_id = ?", userID).
+		Order("qv.created_at DESC").
 		Limit(limit).
-		Find(&votes).Error
+		Scan(&votes).Error
 
 	return votes, err
 }
 
 func (r *UserRepository) GetAcceptedAnswers(userID int64, limit int) ([]domains.Answer, error) {
-	var answers []domains.Answer
+	var accepted []domains.Answer
 
+	// Get answers that THIS USER accepted (questions owned by this user, where an answer was marked as accepted)
 	err := r.db.
-		Where("user_id = ? AND is_accepted = true", userID).
-		Order("updated_at DESC").
+		Table("answers a").
+		Select("a.id, a.question_id, a.description, a.updated_at, a.user_id as answer_author_id").
+		Joins("JOIN questions q ON a.question_id = q.id").
+		Where("q.user_id = ? AND a.is_accepted = true AND a.user_id != ?", userID, userID).
+		Order("a.updated_at DESC").
 		Limit(limit).
-		Find(&answers).Error
+		Scan(&accepted).Error
 
-	return answers, err
+	return accepted, err
 }
 
 func (r *UserRepository) GetEditedQuestions(userID int64, limit int) ([]domains.Question, error) {

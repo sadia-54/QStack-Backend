@@ -45,13 +45,15 @@ type Profile struct {
 	CreatedAt      string   `json:"created_at"`
 }
 
-// user activity 
+// user activity
 type ActivityItem struct {
-	Type      string `json:"type"` // question, answer, vote, edit, accept
-	Title     string `json:"title,omitempty"`
-	TargetID  int64  `json:"target_id,omitempty"`
-	Value     int    `json:"value,omitempty"`
-	CreatedAt string `json:"created_at"`
+	Type       string `json:"type"` // question, answer, vote, edit, accept
+	Title      string `json:"title,omitempty"`
+	TargetID   int64  `json:"target_id,omitempty"`
+	QuestionID int64  `json:"question_id,omitempty"` // For answer activities
+	EntityType string `json:"entity_type,omitempty"` // 'question' or 'answer' for vote/edit activities
+	Value      int    `json:"value,omitempty"`
+	CreatedAt  string `json:"created_at"`
 }
 
 // password change
@@ -60,7 +62,7 @@ type ChangePassword struct {
 	NewPassword     string `json:"new_password" validate:"required,min=6"`
 }
 
-// for public user listing 
+// for public user listing
 type UserSummaryPublic struct {
 	ID             int64  `json:"id"`
 	Username       string `json:"username"`
