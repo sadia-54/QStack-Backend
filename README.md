@@ -130,6 +130,7 @@ go run cmd/migrator/main.go -action up
 
 ```bash
 # API Server (port 8080)
+go mod tidy
 go run cmd/server/main.go
 
 # Email Worker (background process)
