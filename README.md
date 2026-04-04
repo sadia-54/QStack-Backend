@@ -4,7 +4,7 @@ A professional Q&A platform backend (similar to Stack Overflow) built with Go, f
 
 [![Go Version](https://img.shields.io/badge/go-1.25.5-00ADD8?logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![PostgreSQL](https://img.shields.io/badge/postgresql-15+-336791?logo=postgresql)](https://www.postgresql.org/)
+[![PostgreSQL](https://img.shields.io/badge/postgresql-17+-336791?logo=postgresql)](https://www.postgresql.org/)
 [![RabbitMQ](https://img.shields.io/badge/rabbitmq-3.12+-FF6600?logo=rabbitmq)](https://www.rabbitmq.com/)
 
 ---
