@@ -86,7 +86,7 @@ Create a `.env` file in the project root:
 ```env
 # Application
 APP_PORT=8080
-APP_BASE_URL=http://localhost:8080
+APP_BASE_URL=http://localhost:3000
 
 # Database
 DB_HOST=localhost
