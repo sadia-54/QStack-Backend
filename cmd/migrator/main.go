@@ -54,7 +54,8 @@ func main() {
 	)
 
 	// migration folder path
-	migrationsPath := "file://E:/QStack-Backend/migrations"
+	// migrationsPath := "file://E:/QStack-Backend/migrations"
+	migrationsPath := "file://./migrations"
 
 	// create migrator
 	m, err := migrate.New(migrationsPath, databaseURL)
